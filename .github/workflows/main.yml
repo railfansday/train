@@ -1,0 +1,43 @@
+name: Deploy GitHub Pages
+
+on:
+  # Menjalankan workflow setiap ada push ke branch utama (main atau master)
+  push:
+    branches: [ main, master ]
+
+  # Memungkinkan Anda menjalankan workflow secara manual dari tab Actions
+  workflow_dispatch:
+
+# Hak akses untuk token GitHub Actions
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Batasi hanya satu deployment yang berjalan dalam satu waktu
+concurrency:
+  group: "pages"
+  cancel-in-running: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Mengunggah seluruh folder root (tempat file-file .html Anda berada)
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
